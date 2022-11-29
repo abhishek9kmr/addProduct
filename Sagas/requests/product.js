@@ -9,6 +9,5 @@ export async function requestGetProduct(action) {
       key: documentSnapshot.id,
     });
   });
-  console.log('products?????', products);
   return products;
 }
