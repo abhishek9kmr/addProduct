@@ -1,35 +1,31 @@
 export const INITIAL_STATE = {
-  counterVal: 10,
+  products: [],
 };
 
 //Types
-export const INCREMENT = 'INCREMENT';
-export const DECREMENT = 'DECREMENT';
+export const GET_PRODUCT = 'GET_PRODUCT';
+export const SET_PRODUCT = 'SET_PRODUCT';
 
 //action
 
-export const increment = numberAdd => ({
-  type: INCREMENT,
-  numberAdd: numberAdd,
+export const getProduct = () => ({
+  type: GET_PRODUCT,
 });
 
-export const decrement = () => ({
-  type: DECREMENT,
+export const setProduct = products => ({
+  type: SET_PRODUCT,
+  products,
 });
 
 //Reducers
 
 export const reducer = (state = INITIAL_STATE, action) => {
   switch (action.type) {
-    case INCREMENT:
+    case SET_PRODUCT:
+      const {products} = action;
       return {
         ...state,
-        counterVal: state.counterVal + action.numberAdd,
-      };
-    case DECREMENT:
-      return {
-        ...state,
-        counterVal: state.counterVal - 1,
+        products,
       };
     default:
       return state;

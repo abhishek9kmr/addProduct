@@ -23,7 +23,7 @@ function LoginScreen({navigation}) {
 
   let login = () => {
     if (userEmail.length === 0) {
-      loginUserLength: false;
+      loginUserLength = false;
       ToastAndroid.show('Please enter email address', ToastAndroid.LONG);
     } else {
       loginUserLength = true;

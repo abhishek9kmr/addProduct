@@ -1,97 +1,6 @@
-// import React from 'react';
-// import {
-//   SafeAreaView,
-//   View,
-//   FlatList,
-//   StyleSheet,
-//   Text,
-//   StatusBar,
-//   Image,
-//   TouchableOpacity,
-// } from 'react-native';
-
-// const DATA = [
-//   {
-//     id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-//     title: 'First Item',
-//     price: 100,
-//     productImage: require('../Images/bike.jpg'),
-//   },
-//   {
-//     id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-//     title: 'Second Item',
-//     price: 200,
-//     productImage: require('../Images/bike.jpg'),
-//   },
-//   {
-//     id: '58694a0f-3da1-471f-bd96-145571e29d72',
-//     title: 'Third Item',
-//     price: 300,
-//     productImage: require('../Images/bike.jpg'),
-//   },
-// ];
-
-// const Item = ({title, price, productImage}) => (
-//   <View style={styles.item}>
-//     <Text style={styles.title}>{title}</Text>
-//     <Image source={productImage} style={{height: 100, width: 200}} />
-//     <Text>{price}</Text>
-//   </View>
-// );
-
-// const ProductScreen = ({navigation}) => {
-//   let onPress = () => {
-//     navigation.navigate('AddProduct');
-//   };
-//   const renderItem = ({item}) => (
-//     <Item
-//       title={item.title}
-//       price={item.price}
-//       productImage={item.productImage}
-//     />
-//   );
-
-//   return (
-//     <SafeAreaView style={styles.container}>
-//       <FlatList
-//         data={DATA}
-//         renderItem={renderItem}
-//         keyExtractor={item => item.id}
-//       />
-//       <TouchableOpacity style={styles.button} onPress={onPress}>
-//         <Text>Add Product</Text>
-//       </TouchableOpacity>
-//     </SafeAreaView>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     marginTop: StatusBar.currentHeight || 0,
-//   },
-//   item: {
-//     backgroundColor: '#f9c2ff',
-//     padding: 20,
-//     marginVertical: 8,
-//     marginHorizontal: 16,
-//   },
-//   title: {
-//     fontSize: 32,
-//   },
-//   button: {
-//     alignItems: 'center',
-//     backgroundColor: '#DDDDDD',
-//     padding: 10,
-//   },
-// });
-
-// export default ProductScreen;
-
-import React, {useState, useEffect} from 'react';
+import {useFocusEffect} from '@react-navigation/native';
+import React, {useCallback, useEffect} from 'react';
 import {
-  ActivityIndicator,
-  BackHandler,
   Dimensions,
   FlatList,
   Image,
@@ -100,7 +9,8 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import firestore from '@react-native-firebase/firestore';
+import {useDispatch, useSelector} from 'react-redux';
+import {getProduct} from '../Stores/startupStore';
 
 const entireScreenWidth = Dimensions.get('window').width;
 const REM = entireScreenWidth / 376;
@@ -115,31 +25,18 @@ function ProductScreen({navigation}) {
     console.log('item', item);
     navigation.navigate('EditProduct', {item});
   };
-  const [loading, setLoading] = useState(true); // Set loading to true on component mount
-  const [products, setProducts] = useState([]); // Initial empty array of users
 
-  useEffect(() => {
-    const subscriber = firestore()
-      .collection('Product')
-      .onSnapshot(querySnapshot => {
-        const products = [];
+  const dispatch = useDispatch();
 
-        querySnapshot.forEach(documentSnapshot => {
-          products.push({
-            ...documentSnapshot.data(),
-            key: documentSnapshot.id,
-          });
-        });
-        console.log('products?????', products);
-        setProducts(products);
-        setLoading(false);
-      });
+  useFocusEffect(
+    useCallback(() => {
+      dispatch(getProduct());
+    }, [dispatch]),
+  );
 
-    // Unsubscribe from events when no longer in use
-    return () => subscriber();
-  }, []);
+  const products = useSelector(state => state.reducer.products) || [];
 
-  console.log('products????', products);
+  console.log('productsInScreen????', products);
 
   useEffect(() => {
     navigation.addListener('beforeRemove', e => {
@@ -147,11 +44,6 @@ function ProductScreen({navigation}) {
     });
   }, [navigation]);
 
-  if (loading) {
-    return <ActivityIndicator />;
-  }
-
-  // ...
   return (
     <View style={styles.container}>
       <FlatList
@@ -191,6 +83,7 @@ function ProductScreen({navigation}) {
         keyExtractor={(item, index) => {
           return item.id;
         }}
+        extraData={products}
       />
       <TouchableOpacity style={styles.button} onPress={onPress}>
         <Text style={styles.buttonText}>Add Product</Text>
